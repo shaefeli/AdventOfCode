@@ -1,3 +1,7 @@
+#We use as a naming convention a scanner to be what a certain scanner sees in its orientation. 
+#A cube of a scanner is the set of coordinates of a scanner in one particular orientation
+
+#Given a pair of coordinates in any orientation, generate the coordinates for the same position but all possible orientations
 def generate24Coordinates(coord):
     x=coord[0]
     y=coord[1]
@@ -19,7 +23,6 @@ def generate24Coordinates(coord):
     all_coord.append((-y,x,z)) 
     all_coord.append((x,z,-y)) 
     all_coord.append((z,-y,x)) 
-    
     #Cadran (x,y,-z)
     all_coord.append((y,x,-z)) 
     all_coord.append((x,-z,y)) 
@@ -38,14 +41,17 @@ def generate24Coordinates(coord):
     all_coord.append((-z,x,-y))                      
     return all_coord            
  
+#Generate all possible cubes for a scanner
 def coordinatesAllOrientations(coordinates):
     all_coordinates_per_coord = [generate24Coordinates(coord) for coord in coordinates]
     cubes=[]
     for i in range(len(all_coordinates_per_coord[0])):
-        cube_i=[coord[i] for coord in all_coordinates_per_coord]
-        cubes.append(cube_i)
+        cubes.append([coord[i] for coord in all_coordinates_per_coord])
     return cubes
 
+#Check if 2 cubes are overlapping
+#Note the trick to reduce complexity drastically: You "vote" for translations from one cube to another,
+#Keep the vote if it has more than 12 votes. 
 def checkCube(cube1,cube2): #Check if at least 12 beacons are similar
     translations=dict() #Compute the translation that we would need between every pair of points
     for pt1 in cube1:
@@ -66,6 +72,9 @@ def checkCube(cube1,cube2): #Check if at least 12 beacons are similar
 def translateCoord(coord,trans):
     return (coord[0]+trans[0],coord[1]+trans[1],coord[2]+trans[2])
 
+#Check two scanners if they are pairs
+#For this, we use the scan1 as a reference (one cube for it), and compare the 24 cubes of scanner 2 to scanner 1
+#If there is a match, return the coordinates of the cube of scan2 in the scan1 reference and the translation needed
 def checkScannerPair(scan1,scan2):
     cubesScan2 = coordinatesAllOrientations(scan2)
     translation=None
@@ -80,7 +89,10 @@ def checkScannerPair(scan1,scan2):
         #To go from scan2 to scan1, you need to use the cubeThatWorkedIndex cube of scan2, and then translate the coordinates by trans (x2,y2,z2)+trans
         InScan1Coord = [translateCoord(x,translation) for x in cubesScan2[cubeThatWorkedIndex]]
     return InScan1Coord, translation
-    
+  
+#We define scanner 0 to be the reference.
+#We then find pairs with scanner 0, and transform their scanners into absolute coordinates.
+#We then use them as references again to find other pairs.  
 def getCubesInAbsolute(scanners): #We define the absolute to be scanner 0
     scannersToPair=list(range(1,len(scanners)))
     knownScanners=[]

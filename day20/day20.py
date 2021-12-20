@@ -1,3 +1,5 @@
+#This solution runs pretty fast
+#Pad an image 
 def pad_image(image,padding, charToPad):
     padded_image=[]
     width=len(image[0])
@@ -15,16 +17,21 @@ def displayImage(im):
         print("".join(l))
     print("AAAAAAAAAAAAAAAAA")
  
+#Find the next pixel value 
 def get_neighbourghCharacters(i,j,im, algorithm):
     characters = im[j-1][i-1]+im[j-1][i]+im[j-1][i+1]+im[j][i-1]+im[j][i]+im[j][i+1]+im[j+1][i-1]+im[j+1][i]+im[j+1][i+1]
     char_to_bin=characters.replace("#","1").replace(".","0")
     index_in_algo=int(char_to_bin,2)
     return algorithm[index_in_algo]
     
-    
+ 
+#One step of the algorithm
+#Note that we do a padding of 2 at the beginning to be sure to have enough pixels
+#We only do computations from 1 to new_width-1 and 1 to new_height-1 and crop that region out at the end 
 def enhanceImageOneStep(im,i,enhancement_algorithm):
-
     input_image_padded=[]
+    #To know what we pad with, it is easy if the algorithm says that 0 gives ".", but otherwise, it depends on the values!
+    #Note that at i odd, the number of lighting pixels is infinite.
     if i==0:
         charToPadWith="."
     else:
@@ -44,20 +51,15 @@ def enhanceImageOneStep(im,i,enhancement_algorithm):
         for i in range(1,new_width-1):
             output_image[j][i]=get_neighbourghCharacters(i,j,input_image_padded,enhancement_algorithm)
     
-    cropped_output_image=[]
-    for j in range(len(output_image)):
-        if j==0 or j==len(output_image)-1:
-            pass
-        else:
-            cropped_output_image.append(output_image[j][1:-1])
-    return cropped_output_image
+    return [line[1:-1] for line in output_image[1:-1]] #Crop
  
+#We keep this ugly code because we don't want library imports
 def countNrLights(im):
     nr_lights=0
     for line in im:
-        for light in line:
-            if light=="#":
-                nr_lights+=1
+       for light in line:
+           if light=="#":
+               nr_lights+=1
     return nr_lights
                 
     
@@ -68,22 +70,30 @@ if __name__ == "__main__":
         enhancement_algorithm=[x for x in lines[0].strip()]
         image=[[x for x in line.strip()] for line in lines[2:]]
   
+#For our input, the number of lighting pixels at an odd number of steps is infinite
 #Part 1
 nr_steps=2
 output_image=image.copy()
 for i in range(nr_steps):
     output_image = enhanceImageOneStep(output_image,i,enhancement_algorithm)
 print("Solution part 1:")
-print(countNrLights(output_image))
+if nr_steps%2==1 and enhancement_algorithm[0]=="#":
+    print("Infinity!")
+else:
+    print(countNrLights(output_image))
+
 
 #Part 2
-nr_steps=50
+nr_steps=50   
 output_image=image.copy()
 for i in range(nr_steps):
     output_image = enhanceImageOneStep(output_image,i,enhancement_algorithm)
 print("Solution part 2:")
-print(countNrLights(output_image))
-        
+if nr_steps%2==1 and enhancement_algorithm[0]=="#":
+    print("Infinity!")
+else:
+    print(countNrLights(output_image))
+     
         
 
                 

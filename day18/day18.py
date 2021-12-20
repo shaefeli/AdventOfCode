@@ -1,4 +1,7 @@
-#searchString at startIndex is a number  
+#We do it the "hard" way by not using objects, doing the explosions and the splittings directly in the string
+#A lot of play with the indexes had to be done.
+
+#Knowing the first index where a number starts (left most digit of the number), find the complete number starting at startIndex.
 def getNumberRight(searchArray,startIndex):
     number=searchArray[startIndex]
     searchIndex=startIndex+1
@@ -6,7 +9,8 @@ def getNumberRight(searchArray,startIndex):
         number+=searchArray[searchIndex]
         searchIndex+=1
     return number
-    
+
+#Knowing the first index where a number ends (right most digit of the number), find the complete number ending at startIndex.
 def getNumberLeft(searchArray,startIndex):
     number=searchArray[startIndex]
     searchIndex=startIndex-1
@@ -15,7 +19,7 @@ def getNumberLeft(searchArray,startIndex):
         searchIndex-=1
     return number
         
-    
+#Check if we have a regular pair    
 def isPair(potential_pair_array):
     potential_pair_string = "".join(potential_pair_array)
     if "," not in potential_pair_string: return False
@@ -23,7 +27,7 @@ def isPair(potential_pair_array):
     nr_2=potential_pair_string.split(",")[1][0] #We might have more than 1 number, checking if first is number is enough
     return nr_1.isnumeric() and nr_2.isnumeric()
 
-#To use only after using isPair on the text
+#To use only after using isPair on the text, get the text
 def getPair(potential_pair_array):
     potential_pair_string = "".join(potential_pair_array)
     nr_1=potential_pair_string.split(",")[0]
@@ -31,6 +35,8 @@ def getPair(potential_pair_array):
     nr_2=getNumberRight(second_part,0)
     return nr_1,nr_2
 
+#Do the splitting in place
+#numberToReduceOriginal is an array (convert string to array)
 def doSplitting(numberToReduceOriginal):
     numberToReduce=numberToReduceOriginal.copy()
     currentIndex=0
@@ -46,7 +52,8 @@ def doSplitting(numberToReduceOriginal):
                 return numberToReduce
         currentIndex+=1
     return numberToReduce
-        
+   
+#Do the explosion in place   
 def doExplosion(numberToReduceOriginal):
     numberToReduce=numberToReduceOriginal.copy()
     nrOpeningPair=0
@@ -94,14 +101,16 @@ def doExplosion(numberToReduceOriginal):
                 return numberToReduce
         currentIndex+=1
     return numberToReduce
-        
+ 
+#One reduction step 
 def reduceNumberOneStep(numberToReduceOriginal):
     reduceAfterExplosion=doExplosion(numberToReduceOriginal)
     if reduceAfterExplosion==numberToReduceOriginal:
         reduceAfterSplit=doSplitting(numberToReduceOriginal)
         return reduceAfterSplit
     return reduceAfterExplosion
-                
+       
+#Reduce a whole number       
 def reduceNumber(number):
     reducingFinished=False
     before_reduced=number.copy()
@@ -124,6 +133,7 @@ def addList(nr_list):
         currentReducedNr=addTwoNumbers(currentReducedNr,nr_list[i])
     return currentReducedNr
 
+#An inplace method that looks through the string
 def getMagnitude(number_str):
     number_arr=[x for x in number_str]
     nrOpeningPair=0
@@ -162,10 +172,9 @@ for i in range(len(nr_list)):
     for j in range(i+1,len(nr_list)):
         magnitude1 = int(getMagnitude(addList([nr_list[i],nr_list[j]])))
         magnitude2 = int(getMagnitude(addList([nr_list[j],nr_list[i]])))
-        if magnitude1>largestMagnitude:
-            largestMagnitude=magnitude1
-        if magnitude2>largestMagnitude:
-            largestMagnitude=magnitude2
+        max_magnitude=max(magnitude1,magnitude2)
+        if max_magnitude>largestMagnitude:
+            largestMagnitude=max_magnitude
 print("Solution part 2:")
 print(largestMagnitude)
         
