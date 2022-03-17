@@ -1,3 +1,5 @@
+############HELPER CLASS AND FUNCTIONS######################
+#Class that defines an operation (i.e one line in the input)
 class Operation:
     def __init__(self,line,w=0,x=0,y=0,z=0):
         self.x=x
@@ -49,6 +51,7 @@ class Operation:
         else:
             return int(arg)
 
+#Execute one block of operations (there are 14 in the )
 def execute_operations_one_block(op_block,w,x,y,z):
     op_block[0].set_variables(w,x,y,z)
     new_w,new_x,new_y,new_z=op_block[0].get_op_result()
@@ -57,6 +60,7 @@ def execute_operations_one_block(op_block,w,x,y,z):
         new_w,new_x,new_y,new_z=op_block[i].get_op_result()
     return new_x,new_y,new_z
 
+#How the complete Alu would be executed (not used though)
 def execute_alu(operations,w_array):
     new_x,new_y,new_z=0,0,0
     for i in range(len(w_array)):
@@ -64,7 +68,8 @@ def execute_alu(operations,w_array):
     return new_z
     
 
-
+##############MAIN PART###########################
+#Read the input
 operations=[] #2d array, 13xY, 13 is the size of the input, Y the number of operations done per number
 with open("input_day_24","r") as fp:
     lines = fp.readlines()
@@ -78,6 +83,11 @@ with open("input_day_24","r") as fp:
             current_operation.append(Operation(line))
     operations.append(current_operation)
 
+#Do the alu in order.
+#We see that in order to be 0 at the end, z needs to be smaller than 26 in the last operation block
+#Z can only become smaller when dividing it by 26, otherwise it will become greater or equal.
+#Thus, z values need to be smaller than 26**(14-i-1) for block i
+#In practice, we found that z stays always under 100'000. (Otherwise the programm takes around 30 seconds, like this only 3-4 seconds)
 nr_ops=14
 z_upper_bound=100000
 possibilities=set([(0,0,0)])
@@ -88,13 +98,12 @@ for i in range(nr_ops):
     for w in range(1,10):
         for x,y,z in possibilities:
             next_x,next_y,next_z = execute_operations_one_block(operations[i],w,x,y,z)
-            if next_z<z_upper_bound: #In theory here it would be 26**(14-i-1), but let's try with something smaller, because there is a high probability that it is so
+            if next_z<z_upper_bound: #This should be 26**(14-i-1)
                 new_possibilities.add((next_x,next_y,next_z))
                 poss.add((i,w,next_x,next_y,next_z,x,y,z))
     possibilities=set(new_possibilities)
 
-print("Total number of possibilities (when z is staying under",str(z_upper_bound),"):",str(len(possibilities)))
-
+#Arrange the possibilities in a usable form (per turn)
 poss_per_turn=dict()
 for i in range(nr_ops):
     for a in poss:
@@ -138,7 +147,10 @@ for i in range(nr_ops):
 print("Solution part 2:")
 print("".join(numbers))
 
-
+#Solution part 1:
+#65984919997939
+#Solution part 2:
+#11211619541713
 
 
 
